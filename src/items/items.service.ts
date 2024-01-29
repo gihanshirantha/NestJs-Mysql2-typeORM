@@ -26,11 +26,13 @@ export class ItemsService {
     return this.itemsRepository.findOneBy({ id });
   }
 
-  update(id: number, updateItemDto: UpdateItemDto) {
-    return `This action updates a #${id} item`;
+  async update(id: number, updateItemDto: UpdateItemDto) {
+    const item = await this.itemsRepository.findOneBy({ id });
+    item.name = updateItemDto.name;
+    await this.entityManager.save(item);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} item`;
+    return this.itemsRepository.delete(id);
   }
 }
