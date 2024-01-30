@@ -5,6 +5,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Item } from './entities/item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Listing } from './entities/list.entity';
+import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class ItemsService {
@@ -19,7 +20,7 @@ export class ItemsService {
       ...createItemDto.listing,
       ratings: 0,
     });
-    const item = new Item({ ...createItemDto, listing });
+    const item = new Item({ ...createItemDto, listing, comment: [] });
     await this.entityManager.save(item);
   }
 
@@ -30,13 +31,17 @@ export class ItemsService {
   async findOne(id: number) {
     return this.itemsRepository.findOne({
       where: { id },
-      relations: { listing: true },
+      relations: { listing: true, comment: true },
     });
   }
 
   async update(id: number, updateItemDto: UpdateItemDto) {
     const item = await this.itemsRepository.findOneBy({ id });
     item.name = updateItemDto.name;
+    const comments = updateItemDto.comments.map(
+      (createCommentDto) => new Comment(createCommentDto),
+    );
+    item.comment = comments;
     await this.entityManager.save(item);
   }
 
